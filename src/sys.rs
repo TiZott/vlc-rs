@@ -10,6 +10,7 @@ extern "C" {}
 use libc::{c_void, c_int, c_uint, c_char, c_float, uintptr_t, FILE};
 
 pub type c_bool = u8;
+pub type c_size_t = u32;
 
 pub type libvlc_event_type_t = c_int;
 
@@ -785,19 +786,47 @@ extern "C" {
 
 // From libvlc_media_discoverer.h
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug)]
+pub enum libvlc_media_discoverer_category_t {
+    libvlc_media_discoverer_devices     = 0,
+    libvlc_media_discoverer_lan         = 1,
+    libvlc_media_discoverer_podcasts    = 2,
+    libvlc_media_discoverer_localdirs   = 3,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct libvlc_media_discoverer_description_t {
+    pub psz_name: *const c_char,
+    pub psz_longname: *const c_char,
+    pub i_cat: libvlc_media_discoverer_category_t ,
+}
+
 pub enum libvlc_media_discoverer_t {}
 
 extern "C" {
-    pub fn libvlc_media_discoverer_new_from_name(
+    pub fn libvlc_media_discoverer_new(
         p_inst: *mut libvlc_instance_t, psz_name: *const c_char) -> *mut libvlc_media_discoverer_t;
+    pub fn libvlc_media_discoverer_start(
+        p_mdis: *mut libvlc_media_discoverer_t ) -> c_int;
+    pub fn libvlc_media_discoverer_stop(p_mdis: *mut libvlc_media_discoverer_t);
     pub fn libvlc_media_discoverer_release(p_mdis: *mut libvlc_media_discoverer_t);
-    pub fn libvlc_media_discoverer_localized_name(
-        p_mdis: *mut libvlc_media_discoverer_t) -> *mut c_char;
     pub fn libvlc_media_discoverer_media_list(
         p_mdis: *mut libvlc_media_discoverer_t) -> *mut libvlc_media_list_t;
+    pub fn libvlc_media_discoverer_is_running(p_mdis: *mut libvlc_media_discoverer_t) -> c_int;
+    pub fn libvlc_media_discoverer_list_get(
+        p_inst: *mut libvlc_instance_t,
+        i_cat: libvlc_media_discoverer_category_t,
+        ppp_services: *mut *mut *mut libvlc_media_discoverer_description_t ) -> c_size_t;
+    pub fn libvlc_media_discoverer_list_release(
+        pp_services: *mut *mut libvlc_media_discoverer_description_t, i_count : c_size_t );
+    pub fn libvlc_media_discoverer_new_from_name(
+        p_inst: *mut libvlc_instance_t, psz_name: *const c_char) -> *mut libvlc_media_discoverer_t;
+    pub fn libvlc_media_discoverer_localized_name(
+        p_mdis: *mut libvlc_media_discoverer_t) -> *mut c_char;
     pub fn libvlc_media_discoverer_event_manager(
         p_mdis: *mut libvlc_media_discoverer_t) -> *mut libvlc_event_manager_t;
-    pub fn libvlc_media_discoverer_is_running(p_mdis: *mut libvlc_media_discoverer_t) -> c_int;
 }
 
 // From libvlc_vlm.h

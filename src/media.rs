@@ -44,6 +44,7 @@ impl Media {
         }
     }
     
+    /// Create a media for an already open file descriptor.
     pub fn new_fd(instance: &Instance, fd: i32) -> Option<Media> {
         unsafe{
             let p = sys::libvlc_media_new_fd(instance.ptr, fd);
@@ -55,6 +56,29 @@ impl Media {
         }
     }
 
+    /// Add an option to the media.
+    ///
+    /// This option will be used to determine how the media_player will read the media. This allows to use VLC's advanced reading/streaming options on a per-media basis.
+    ///
+    /// Note:
+    /// The options are listed in 'vlc –long-help' from the command line, e.g. "-sout-all". Keep in mind that available options and their semantics vary across LibVLC versions and builds. 
+    /// 
+    /// Warning:
+    /// Not all options affects libvlc_media_t objects: Specifically, due to architectural issues most audio and video options, such as text renderer options, have no effects on an individual media. These options must be set through libvlc_new() instead.
+    pub fn add_option(&self, options: &str) {
+        unsafe { sys::libvlc_media_add_option( self.ptr, to_cstr( options ).as_ptr()) }
+    }
+
+    /// Add an option to the media with configurable flags.
+    /// 
+    /// This option will be used to determine how the media_player will read the media. This allows to use VLC's advanced reading/streaming options on a per-media basis.
+    /// 
+    /// The options are detailed in vlc –long-help, for instance "--sout-all". Note that all options are not usable on medias: specifically, due to architectural issues, video-related options such as text renderer options cannot be set on a single media. They must be set on the whole libvlc instance instead.
+    pub fn add_option_flag(&self, options: &str, flags: u32) {
+        unsafe { sys::libvlc_media_add_option_flag( self.ptr, to_cstr( options ).as_ptr(), flags) }
+    }
+
+    /// Get the media resource locator (mrl) from a media descriptor object.
     pub fn mrl(&self) -> Option<String> {
         unsafe{
             let p_str = sys::libvlc_media_get_mrl(self.ptr);
