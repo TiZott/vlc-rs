@@ -4,7 +4,7 @@
 
 #![allow(non_camel_case_types, non_upper_case_globals)]
 
-#[link(name = "vlc")]
+#[link(name = "libvlc")]
 extern "C" {}
 
 use libc::{c_void, c_int, c_uint, c_char, c_float, uintptr_t, FILE};
